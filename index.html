@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Document Analyzer</title>
+    <style>
+        :root { --primary: #4a90e2; --bg: #f8f9fa; --card-bg: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); max-width: 900px; margin: 3rem auto; padding: 0 1rem; color: #333; }
+        
+        h1 { text-align: center; color: #2c3e50; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 2rem; }
+
+        .container { background: var(--card-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* Upload Form */
+        .upload-box { border: 2px dashed #cbd5e0; border-radius: 8px; padding: 2rem; text-align: center; margin-bottom: 20px; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--primary); background: #f0f7ff; }
+        
+        .btn { background-color: var(--primary); color: white; padding: 12px 24px; border: none; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 1rem; transition: 0.2s; }
+        .btn:hover { background-color: #357abd; transform: translateY(-1px); }
+        .btn-green { background-color: #27ae60; text-decoration: none; display: inline-block; }
+        .btn-green:hover { background-color: #219150; }
+
+        /* Status & Results */
+        #loading { display: none; text-align: center; margin-top: 1rem; color: #666; font-style: italic; }
+        #error { color: #e74c3c; margin-top: 1rem; text-align: center; font-weight: bold; }
+        #results { margin-top: 2rem; display: none; }
+
+        /* AI Insight Card */
+        .ai-insight { background: #eef2f7; border-left: 5px solid var(--primary); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; animation: fadeIn 0.8s ease; }
+        .tag-badge { background: #2c3e50; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 10px; vertical-align: middle; }
+        .summary-text { font-style: italic; color: #555; line-height: 1.6; margin-top: 10px; }
+
+        pre { background: #2d3436; color: #dfe6e9; padding: 1rem; overflow-x: auto; border-radius: 6px; font-size: 0.9rem; max-height: 400px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <h1>AI Document Analyzer</h1>
+    <p class="subtitle">Classification • Natural Language Summary • Hierarchy Extraction</p>
+
+    <div class="container">
+        <form id="uploadForm" class="upload-box">
+            <input type="file" id="pdfFile" accept=".pdf" required style="margin-bottom: 1rem;">
+            <br>
+            <button type="submit" class="btn">Analyze & Extract</button>
+        </form>
+
+        <div id="loading">
+            Analyzing document structure and context...<br>
+            <small>(Running ministral-3:3b)</small>
+        </div>
+        <div id="error"></div>
+
+        <div id="results">
+            <div class="ai-insight">
+                <h3 style="margin: 0;">
+                    Document Type: <span id="docType" class="tag-badge">Detecting...</span>
+                </h3>
+                <p style="margin-top: 15px;"><strong>AI Summary:</strong></p>
+                <p id="docSummary" class="summary-text"></p>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Hierarchy JSON Preview</h3>
+                <div id="downloadContainer"></div>
+            </div>
+            
+            <pre id="jsonPreview"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI Reset
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').textContent = '';
+            document.getElementById('downloadContainer').innerHTML = '';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    document.getElementById('error').textContent = 'Error: ' + result.error;
+                } else {
+                    // 1. Update Document Type
+                    const typeSpan = document.getElementById('docType');
+                    typeSpan.textContent = result.data.document_type || "Unknown";
+
+                    // 2. Update Summary
+                    const sumP = document.getElementById('docSummary');
+                    sumP.textContent = result.data.summary || "No summary generated.";
+
+                    // 3. Update JSON Preview
+                    document.getElementById('jsonPreview').textContent = JSON.stringify(result.data, null, 2);
+                    
+                    // 4. Create Download Button
+                    if (result.download_url) {
+                        const dlBtn = document.createElement('a');
+                        dlBtn.href = result.download_url;
+                        dlBtn.className = 'btn btn-green';
+                        dlBtn.textContent = 'Download Full JSON';
+                        document.getElementById('downloadContainer').appendChild(dlBtn);
+                    }
+
+                    document.getElementById('results').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('error').textContent = 'Network Error: ' + err.message;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[project]
+name = "doc-extractor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ollama>=0.6.1",
+    "pdf2image>=1.17.0",
+    "pdfminer>=20191125",
+    "pdfplumber>=0.11.8",
+    "pytesseract>=0.3.13",
+]
