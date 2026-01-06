@@ -1,0 +1,75 @@
+:root {
+    --primary: #2563eb;
+    --bg: #f8fafc;
+    --card: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 { color: #1e293b; margin-bottom: 0.5rem; }
+p { color: #64748b; margin-top: 0; }
+
+.upload-section {
+    background: var(--card);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+form { display: flex; gap: 1rem; width: 100%; }
+
+input[type="file"] {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+}
+
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+button:hover { opacity: 0.9; }
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.output-section {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+pre {
+    color: #a5f3fc;
+    margin: 0;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
